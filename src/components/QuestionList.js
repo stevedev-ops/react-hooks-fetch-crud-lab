@@ -1,47 +1,35 @@
-import React, { useEffect, useState } from "react";
+import React, { useState, useEffect } from "react";
 import QuestionItem from "./QuestionItem";
 
 function QuestionList() {
   const [questions, setQuestions] = useState([]);
 
   useEffect(() => {
-    async function fetchQuestions() {
-      const response = await fetch("http://localhost:4000/questions");
-      const data = await response.json();
-      setQuestions(data);
-    }
-
-    fetchQuestions();
+    fetch("http://localhost:4000/questions")
+      .then((response) => response.json())
+      .then((questions) => setQuestions(questions));
   }, []);
 
   function handleDelete(id) {
-    setQuestions((prevQuestions) => prevQuestions.filter(question => question.id !== id));
-
     fetch(`http://localhost:4000/questions/${id}`, {
       method: "DELETE",
+    }).then(() => {
+      const updatedQuestions = questions.filter((q) => q.id !== id);
+      setQuestions(updatedQuestions);
     });
-  }
-
-  function handleUpdateCorrectIndex(id, correctIndex) {
-    setQuestions((prevQuestions) => 
-      prevQuestions.map((question) =>
-        question.id === id ? { ...question, correctIndex } : question
-      )
-    );
   }
 
   return (
     <section>
       <h1>Quiz Questions</h1>
       <ul>
-        {questions.map(question => (
-          <QuestionItem 
-            key={question.id} 
-            question={question} 
-            onDelete={handleDelete} 
-            onUpdateCorrectIndex={handleUpdateCorrectIndex} 
-          />
-        ))}
+        {questions.length > 0 ? (
+          questions.map((question) => (
+            <QuestionItem key={question.id} question={question} onDelete={handleDelete} />
+          ))
+        ) : (
+          <p>No questions available</p>
+        )}
       </ul>
     </section>
   );

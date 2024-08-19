@@ -1,34 +1,7 @@
-import React, { useState, memo } from "react";
+import React from "react";
 
-const QuestionItem = memo(({ question, onDelete, onUpdateCorrectIndex }) => {
+function QuestionItem({ question, onDelete }) {
   const { id, prompt, answers, correctIndex } = question;
-  const [selectedIndex, setSelectedIndex] = useState(correctIndex);
-
-  const options = answers.map((answer, index) => (
-    <option key={index} value={index}>
-      {answer}
-    </option>
-  ));
-
-  function handleDelete() {
-    onDelete(id);
-  }
-
-  async function handleChange(event) {
-    const updatedCorrectIndex = parseInt(event.target.value, 10);
-    setSelectedIndex(updatedCorrectIndex);
-
-    await fetch(`http://localhost:4000/questions/${id}`, {
-      method: "PATCH",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ correctIndex: updatedCorrectIndex }),
-    });
-
-    // Update the correctIndex in the parent component (QuestionList)
-    onUpdateCorrectIndex(id, updatedCorrectIndex);
-  }
 
   return (
     <li>
@@ -36,13 +9,17 @@ const QuestionItem = memo(({ question, onDelete, onUpdateCorrectIndex }) => {
       <h5>Prompt: {prompt}</h5>
       <label>
         Correct Answer:
-        <select value={selectedIndex} onChange={handleChange}>
-          {options}
+        <select defaultValue={correctIndex}>
+          {answers && answers.map((answer, index) => (
+            <option key={index} value={index}>
+              {answer}
+            </option>
+          ))}
         </select>
       </label>
-      <button onClick={handleDelete}>Delete Question</button>
+      <button onClick={() => onDelete(id)}>Delete Question</button>
     </li>
   );
-});
+}
 
 export default QuestionItem;
