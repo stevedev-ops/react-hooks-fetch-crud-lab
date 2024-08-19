@@ -1,7 +1,8 @@
-import React from "react";
+import React, { useState, memo } from "react";
 
-function QuestionItem({ question, onDelete }) {
+const QuestionItem = memo(({ question, onDelete, onUpdateCorrectIndex }) => {
   const { id, prompt, answers, correctIndex } = question;
+  const [selectedIndex, setSelectedIndex] = useState(correctIndex);
 
   const options = answers.map((answer, index) => (
     <option key={index} value={index}>
@@ -14,7 +15,8 @@ function QuestionItem({ question, onDelete }) {
   }
 
   async function handleChange(event) {
-    const updatedCorrectIndex = event.target.value;
+    const updatedCorrectIndex = parseInt(event.target.value, 10);
+    setSelectedIndex(updatedCorrectIndex);
 
     await fetch(`http://localhost:4000/questions/${id}`, {
       method: "PATCH",
@@ -23,6 +25,9 @@ function QuestionItem({ question, onDelete }) {
       },
       body: JSON.stringify({ correctIndex: updatedCorrectIndex }),
     });
+
+    // Update the correctIndex in the parent component (QuestionList)
+    onUpdateCorrectIndex(id, updatedCorrectIndex);
   }
 
   return (
@@ -31,16 +36,13 @@ function QuestionItem({ question, onDelete }) {
       <h5>Prompt: {prompt}</h5>
       <label>
         Correct Answer:
-        <select
-          value={correctIndex}
-          onChange={handleChange}
-        >
+        <select value={selectedIndex} onChange={handleChange}>
           {options}
         </select>
       </label>
       <button onClick={handleDelete}>Delete Question</button>
     </li>
   );
-}
+});
 
 export default QuestionItem;

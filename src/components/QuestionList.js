@@ -14,12 +14,20 @@ function QuestionList() {
     fetchQuestions();
   }, []);
 
-  async function handleDelete(id) {
-    await fetch(`http://localhost:4000/questions/${id}`, {
+  function handleDelete(id) {
+    setQuestions((prevQuestions) => prevQuestions.filter(question => question.id !== id));
+
+    fetch(`http://localhost:4000/questions/${id}`, {
       method: "DELETE",
     });
+  }
 
-    setQuestions(questions.filter(question => question.id !== id));
+  function handleUpdateCorrectIndex(id, correctIndex) {
+    setQuestions((prevQuestions) => 
+      prevQuestions.map((question) =>
+        question.id === id ? { ...question, correctIndex } : question
+      )
+    );
   }
 
   return (
@@ -31,6 +39,7 @@ function QuestionList() {
             key={question.id} 
             question={question} 
             onDelete={handleDelete} 
+            onUpdateCorrectIndex={handleUpdateCorrectIndex} 
           />
         ))}
       </ul>
